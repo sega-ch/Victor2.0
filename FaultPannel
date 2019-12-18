@@ -6,7 +6,7 @@ void Start()
     FaultMsg.text = "Вы проиграли. Нажав на кнопку внизу вы можете перезапустить игру!"
 }
 
-void OnReserButtonClick()
+public void OnReserButtonClick()
 {
       SceneManager.LoadScene("1");  
 {
