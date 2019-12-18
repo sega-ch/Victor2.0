@@ -52,7 +52,7 @@ public class GameController : MonoBehaviour
         }
 	if(_timer <=0)
 	{
-	    QuestText = "Вы проиграли";
+	    SceneManager.LoadScene("FaultScene");
 	}
 	}
 }
