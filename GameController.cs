@@ -50,6 +50,9 @@ public class GameController : MonoBehaviour
         {
             txtTimer.text = "0:" + (int)_time;
         }
-		
+	if(_timer <=0)
+	{
+	    QuestText = "Вы проиграли";
+	}
 	}
 }
