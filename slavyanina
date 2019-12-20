@@ -1,0 +1,108 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+public class GameController : MonoBehaviour
+{
+    public Header PanelHeader;
+    private float _time;
+    public Text txtTimer;
+    public List<string> Alphabet;
+    private List<Question> Quest = new List<Question>
+    {
+        new Question("Государство в Южном полушарии, а также самый маленький материк","АВСТРАЛИЯ"), new Question("Самая высокая гора в мире","ЭВЕРЕСТ"),
+        new Question("Самое большое по глубине озеро в мире","БАЙКАЛ"), new Question("Самое маленькое государство в мире","ВАТИКАН"),
+        new Question("Самое бедное государство в мире","ГАИТИ"), new Question("Крупное государство в Западной Европе, не имевшее колоний", "ГЕРМАНИЯ"),
+        new Question("Княжество в Европе, а также самое плотное государство в мире","МОНАКО"), new Question("Самое большое государство по населению в мире","КИТАЙ"),
+        new Question("Островная империя в Азии","ЯПОНИЯ"), new Question("Самое большое по площади государство в мире","РОССИЯ")
+    };
+    public Text QuestText;
+    int CurrentIndex = 0;
+    public Button[] answerButtons = new Button[10];
+    public Button[] letterButtons = new Button[30];
+    int lastind;
+    string answer = string.Empty;
+    public Image line;
+    public GameObject rightAnswer;
+    public GameObject nonrightAnswer;
+    public GameObject[] star = new GameObject[3];
+    void Start()
+    {
+        PanelHeader.InitHeader();
+        Alphabet = new List<string>();
+        for (int i = 1040; i < 1072; i++) Alphabet.Add(((char)i).ToString());
+		Next();
+	}
+
+    void Update()
+    {
+        if (QuestText.gameObject.activeSelf && _time > 0) _time -= Time.deltaTime;
+        if (_time >= 0) txtTimer.text = (int)_time / 60 % 60 + ":" + (((int)_time) % 60).ToString("00");
+        if (_time <= 0 && QuestText.gameObject.activeSelf)
+        {
+            Remove();
+            foreach (var answerButton in answerButtons) if (answerButton.GetComponentInChildren<Text>().text == string.Empty) answerButton.GetComponentInChildren<Text>().text = " ";
+            nonrightAnswer.SetActive(true);
+            rightAnswer.SetActive(false);
+        }
+        if (line.fillAmount == 0.2f) star[0].SetActive(true);
+        if (line.fillAmount == 0.5f) star[1].SetActive(true);
+        if (line.fillAmount == 1f) star[2].SetActive(true);
+    }
+    void Remove()
+    {
+        if (Quest.Count > 0)
+        {
+            QuestText.gameObject.SetActive(false);
+            Quest.Remove(Quest[CurrentIndex]);
+        }
+    }
+    public void OnClick(Button button)
+    {
+        if (Quest.Count > 0) if (answer.Length < Quest[CurrentIndex].Answer.Length && lastind < Quest[CurrentIndex].Answer.Length && QuestText.gameObject.activeSelf)
+            {
+                button.gameObject.SetActive(false);
+                answerButtons[lastind].GetComponentInChildren<Text>().text = button.GetComponentInChildren<Text>().text;
+                lastind++;
+                answer += button.GetComponentInChildren<Text>().text;
+                if (answer.Length == Quest[CurrentIndex].Answer.Length)
+                {
+                    if (answer == Quest[CurrentIndex].Answer && line.fillAmount < 1f)
+                    {
+                        line.fillAmount += 0.1f;
+                        nonrightAnswer.SetActive(false);
+                        rightAnswer.SetActive(true);
+                        Remove();
+                    }
+                    else
+                    {
+                        nonrightAnswer.SetActive(true);
+                        rightAnswer.SetActive(false);
+                        Remove();
+                    }
+                }
+            }
+    }
+    public void Next()
+    {
+        if (Quest.Count > 0)
+        {
+            _time = Config.time;
+            lastind = 0;
+            answer = string.Empty;
+            rightAnswer.SetActive(false);
+            nonrightAnswer.SetActive(false);
+            CurrentIndex = Random.Range(0, Quest.Count);
+            QuestText.gameObject.SetActive(true);
+            QuestText.text = Quest[CurrentIndex].Quest;
+            foreach (var answerLetterButton in answerButtons) answerLetterButton.GetComponentInChildren<Text>().text = string.Empty;
+            for (int i = 0; i < Quest[CurrentIndex].Answer.Length; i++) answerButtons[i].gameObject.SetActive(true);
+            for (int i = Quest[CurrentIndex].Answer.Length; i < answerButtons.Length; i++) answerButtons[i].gameObject.SetActive(false);
+            foreach (var letterButton in letterButtons)
+            {
+                letterButton.gameObject.SetActive(true);
+                letterButton.GetComponentInChildren<Text>().text = Quest[CurrentIndex].Answer.ToCharArray()[Random.Range(0, Quest[CurrentIndex].Answer.Length)].ToString();
+            }
+        }
+    }
+}
